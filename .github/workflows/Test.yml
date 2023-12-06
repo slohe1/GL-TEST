@@ -1,0 +1,31 @@
+on:
+  pull_request:
+    branches:
+      - master
+      - development
+jobs:
+  set-environment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Doc Environment based on branch name
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            TARGET_BRANCH=${{ github.event.pull_request.head.ref }}
+            if [[ "$TARGET_BRANCH" == "master" ]]; then
+              echo "Environment: production" >> $GITHUB_ENV
+              echo "DOC_ENV=production" >> $GITHUB_ENV
+            elif [[ "$TARGET_BRANCH" == "development" ]]; then
+              echo "Environment: development" >> $GITHUB_ENV
+              echo "DOC_ENV=development" >> $GITHUB_ENV
+            else
+              echo "Environment: Wrong Environment" >> $GITHUB_ENV
+              echo "DOC_ENV=Wrong Environment" >> $GITHUB_ENV
+            fi
+          fi
+  display-environment:
+    needs: set-environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Display Environment Variable
+        run: |
+          echo "DOC_ENV: $DOC_ENV"
